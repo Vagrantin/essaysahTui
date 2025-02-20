@@ -105,11 +105,12 @@ fn run_render(mut terminal: DefaultTerminal) -> io::Result<()> {
             let list = List::new(items)
                 .block(Block::default().title("List").borders(Borders::ALL));
             frame.render_widget(list, text);
-            
+           /* 
             let selected_server = match &app.server {
                 Some(server_name) => format!("Selected!: {}", server_name),
                 None => "".to_string(),
             };
+            */
             let status = format!("{}", &app.status_message);
 
             let debug_message = Paragraph::new(status)
