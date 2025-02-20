@@ -46,7 +46,6 @@ impl App {
     fn print_selected(&mut self) {
         
         disable_raw_mode().unwrap();
-        // Clears entire screen and moves cursor to (0,0)
         stdout().execute(Clear(ClearType::All)).unwrap();
         
         self.server = Some(self.items[self.selected].clone());
