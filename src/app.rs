@@ -49,8 +49,9 @@ impl App {
                Some(server_name) => format!("{}", server_name),
                None => "".to_string(),
            };
-        let command = "new -s";
-        match Command::new("tmux")
+        let command = "tmux new -s";
+        match Command::new("sh")
+            .arg("-c")
             .arg(&command)
             .arg(&selected_server)
             .output()

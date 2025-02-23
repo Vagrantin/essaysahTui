@@ -51,9 +51,9 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
                  KeyCode::Down => app.move_down(),
                  KeyCode::Char('s') => app.move_down(),
                  KeyCode::Enter => {
-                     app.tmux_session()?;
-                     terminal.clear()?;
-                 },
+                    app.tmux_session()?;
+                    terminal.clear()?;
+             },
                  _ => {}
              }
             }
