@@ -43,6 +43,7 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
 
         if let event::Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') || key.code == KeyCode::Char('Q') {
+                terminal.clear()?;
                 return Ok(());
             } else {
              match key.code {

@@ -1,7 +1,5 @@
 use std:: {
-    fs::File,
-    io::{self,BufRead,BufReader, stdout,Result,Write},
-    path::Path,
+    io::{stdout,Result},
     process::Command
 };
 use ratatui::{
@@ -12,6 +10,8 @@ use ratatui::{
     },
 };
 
+mod parser;
+
 pub struct App {
    pub items: Vec<Line<'static>>,
    pub selected: usize,
@@ -21,8 +21,8 @@ pub struct App {
 
 impl App {
    pub fn new() -> App {
-            let filename = "servers.conf";
-            let servers = servers_from_file(filename);
+            let filename = "spd";
+            let servers = parser::parse_ssh_hosts(filename);
         App {
             items: servers,
             selected: 0,
@@ -46,23 +46,26 @@ impl App {
         
         self.server = Some(self.items[self.selected].clone());
         let selected_server = match &self.server {
-               Some(server_name) => format!("{}", server_name),
+               Some(server_name) => {
+                   server_name.spans.iter()
+                       .map(|span| span.content.clone())
+                       .collect::<String>()
+                       .trim()
+                       .to_string()
+                       },
                None => "".to_string(),
            };
-        let command = "tmux new -s";
-        match Command::new("sh")
-            .arg("-c")
-            .arg(&command)
+        match Command::new("tmux")
+            .arg("new")
+            .arg("-s")
             .arg(&selected_server)
-            .output()
+            .status()
             { 
-                Ok(output) => {
-                    if output.status.success() {
-                    self.status_message = format!("Executed: {} {}", &command, &selected_server);
+                Ok(status) => {
+                    if status.success() {
+                    self.status_message = format!("Executed the tmux session : {}", &selected_server);
                 } else {
-                    let stdout = io::stdout().write_all(&output.stdout).unwrap();
-                    let stderr = io::stderr().write_all(&output.stderr).unwrap();
-                    self.status_message = format!("didn't work: {}\n stdout {:?}\nstderr{:?}", output.status, stdout, stderr);
+                    self.status_message = format!("Didn't work on server {}:\nIt's potentially a duplicate session ", &selected_server);
                     }
                 }
                 Err(e) => {
@@ -74,11 +77,3 @@ impl App {
     }
 }
 
-fn servers_from_file(filename: impl AsRef<Path>) -> Vec<Line<'static>> {
-    let file = File::open(filename).expect("File not found");
-    let buf = BufReader::new(file);
-    let data: Vec<Line> = buf.lines()
-        .map(|l| {Line::from(l.unwrap())})
-        .collect::<Vec<_>>();
-    data
-}
