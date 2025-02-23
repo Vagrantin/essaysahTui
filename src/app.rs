@@ -19,12 +19,12 @@ pub struct App {
    pub server: Option<Line<'static>>,
    pub status_message: String,
    pub vertical_scroll_state: ScrollbarState,
-   pub vertical_scroll: usize,
+   pub state: ListState,
 }
 
 impl App {
    pub fn new() -> App {
-            let filename = "spd";
+            let filename = ".ssh/config";
             let servers = parser::parse_ssh_hosts(filename);
             let number_of_items = servers.len();
         App {
@@ -33,19 +33,23 @@ impl App {
             server: None, 
             status_message: "".to_owned(),
             vertical_scroll_state: ScrollbarState::new(number_of_items),
-            vertical_scroll: 0
+            state: ListState::default().with_selected(Some(0))
 
         }
     }
 
     pub fn move_up(&mut self) {
         self.selected = self.selected.saturating_sub(1);
+        self.state.select(Some(self.selected));
+        self.vertical_scroll_state = self.vertical_scroll_state.position(self.selected);
     }
 
     pub fn move_down(&mut self) {
         if self.selected < self.items.len() - 1 {
             self.selected += 1;
         }
+        self.state.select(Some(self.selected));
+        self.vertical_scroll_state = self.vertical_scroll_state.position(self.selected);
     }
     pub fn tmux_session(&mut self) -> Result<()>{
         disable_raw_mode()?;
@@ -62,10 +66,13 @@ impl App {
                        },
                None => "".to_string(),
            };
+        let ssh_command = format!("ssh XPVM5843@{}", &selected_server);
+
         match Command::new("tmux")
             .arg("new")
             .arg("-s")
             .arg(&selected_server)
+            .arg(ssh_command)
             .status()
             { 
                 Ok(status) => {
