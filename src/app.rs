@@ -4,6 +4,7 @@ use std:: {
 };
 use ratatui::{
     prelude::*,
+    widgets::*,
     crossterm::{
         terminal::{Clear,ClearType,disable_raw_mode, enable_raw_mode},
         ExecutableCommand,
@@ -16,18 +17,24 @@ pub struct App {
    pub items: Vec<Line<'static>>,
    pub selected: usize,
    pub server: Option<Line<'static>>,
-   pub status_message: String
+   pub status_message: String,
+   pub vertical_scroll_state: ScrollbarState,
+   pub vertical_scroll: usize,
 }
 
 impl App {
    pub fn new() -> App {
             let filename = "spd";
             let servers = parser::parse_ssh_hosts(filename);
+            let number_of_items = servers.len();
         App {
             items: servers,
             selected: 0,
             server: None, 
-            status_message: "".to_owned()
+            status_message: "".to_owned(),
+            vertical_scroll_state: ScrollbarState::new(number_of_items),
+            vertical_scroll: 0
+
         }
     }
 
