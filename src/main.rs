@@ -14,7 +14,7 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
         terminal.draw(|frame| {
             let chunks = Layout::vertical([
                 Constraint::Min(1),
-                Constraint::Length(5),
+                Constraint::Length(9),
             ]);
             let [text, debug] = chunks.areas(frame.area());
             let items: Vec<ListItem> = app

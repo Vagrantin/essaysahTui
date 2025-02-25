@@ -1,6 +1,7 @@
 use std:: {
-    io::{stdout,Result},
-    process::Command
+    io::{stdout,stderr,Result,Write},
+    process::{Stdio,Command},
+    str
 };
 use ratatui::{
     prelude::*,
@@ -12,6 +13,7 @@ use ratatui::{
 };
 
 mod parser;
+//mod tmux;
 
 pub struct App {
    pub items: Vec<Line<'static>>,
@@ -51,6 +53,7 @@ impl App {
         self.state.select(Some(self.selected));
         self.vertical_scroll_state = self.vertical_scroll_state.position(self.selected);
     }
+    //tmux::tmux_session();
     pub fn tmux_session(&mut self) -> Result<()>{
         disable_raw_mode()?;
         stdout().execute(Clear(ClearType::All))?;
@@ -66,20 +69,35 @@ impl App {
                        },
                None => "".to_string(),
            };
-        let ssh_command = format!("ssh XPVM5843@{}", &selected_server);
+        let ssh_command = format!("ssh root@{}", &selected_server);
+        //let ssh_command = format!("ssh xpvm5843@{}", &selected_server);
+        //let ssh_command = format!("ping google.com");
 
         match Command::new("tmux")
             .arg("new")
             .arg("-s")
             .arg(&selected_server)
+            //.arg(format!("root@{}",&selected_server))
             .arg(ssh_command)
-            .status()
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
             { 
-                Ok(status) => {
-                    if status.success() {
-                    self.status_message = format!("Executed the tmux session : {}", &selected_server);
+                
+                Ok(child) => {
+                    let output = child.wait_with_output()?;
+
+                    let stderr_msg = String::from_utf8_lossy(&output.stderr);
+                    let stdout_msg = String::from_utf8_lossy(&output.stdout);
+
+                    if output.status.success() {
+                    self.status_message = format!("Executed the tmux session : {}\nStdout{}\nStderr{}",
+                                                  &selected_server,
+                                                  stdout_msg,
+                                                  stderr_msg
+                                                  );
                 } else {
-                    self.status_message = format!("Didn't work on server {}:\nIt's potentially a duplicate session ", &selected_server);
+                    self.status_message = format!("Didn't work on server {}", &selected_server);
                     }
                 }
                 Err(e) => {
