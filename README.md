@@ -21,12 +21,12 @@ A terminal-based SSH connection manager that reads hosts from your SSH config fi
 ### Building from Source
 
 ```bash
-git clone https://github.com/Vagrantin/sshTUI.git
-cd sshTUI
+git clone https://github.com/Vagrantin/essaysahTui.git
+cd essaysahTui
 cargo build --release
 ```
 
-The compiled binary will be available at `target/release/sshTUI`.
+The compiled binary will be available at `target/release/essaysahTui`.
 
 ## Usage
 
@@ -39,7 +39,7 @@ The compiled binary will be available at `target/release/sshTUI`.
 
 2. Run the application in Powershell or CMD in Windows Terminal:
    ```
-   ./sshTUI
+   ./essaysahTui.exe
    ```
 
 3. Navigate the list using the following controls:
