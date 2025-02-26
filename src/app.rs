@@ -69,15 +69,14 @@ impl App {
                        },
                None => "".to_string(),
            };
-        let ssh_command = format!("ssh root@{}", &selected_server);
+        let ssh_command = format!("xpvm5843@{}", &selected_server);
         //let ssh_command = format!("ssh xpvm5843@{}", &selected_server);
         //let ssh_command = format!("ping google.com");
 
-        match Command::new("tmux")
-            .arg("new")
-            .arg("-s")
-            .arg(&selected_server)
+        match Command::new("wezterm.exe")
+            //.arg(&selected_server)
             //.arg(format!("root@{}",&selected_server))
+            .arg("ssh")
             .arg(ssh_command)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -97,7 +96,11 @@ impl App {
                                                   stderr_msg
                                                   );
                 } else {
-                    self.status_message = format!("Didn't work on server {}", &selected_server);
+                    self.status_message = format!("Didn’ work on : {}\nStdout{}\nStderr{}",
+                                                  &selected_server,
+                                                  stdout_msg,
+                                                  stderr_msg
+                                                  );
                     }
                 }
                 Err(e) => {
