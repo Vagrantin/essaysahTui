@@ -21,12 +21,12 @@ A terminal-based SSH connection manager that reads hosts from your SSH config fi
 ### Building from Source
 
 ```bash
-git clone https://sr.ht/~vagrantin/essaysashTUI/
-cd essaysashTUI
+git clone https://github.com/Vagrantin/sshTUI.git
+cd sshTUI
 cargo build --release
 ```
 
-The compiled binary will be available at `target/release/essaysashTUI`.
+The compiled binary will be available at `target/release/sshTUI`.
 
 ## Usage
 
