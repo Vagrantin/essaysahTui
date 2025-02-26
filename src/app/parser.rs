@@ -38,7 +38,7 @@ mod tests {
 
     #[test]
     fn test_parse_ssh_hosts() {
-        let hosts = parse_ssh_hosts("spd.txt");
+        let hosts = parse_ssh_hosts("demo.txt");
         assert!(!hosts.is_empty());
     }
 }
