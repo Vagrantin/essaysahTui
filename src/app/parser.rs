@@ -1,10 +1,9 @@
-use std:: {
+use ratatui::text::Line;
+use std::{
     fs::File,
-    io::{BufRead,BufReader},
+    io::{BufRead, BufReader},
     path::Path,
 };
-use ratatui::text::Line;
-
 
 pub fn parse_ssh_hosts<P: AsRef<Path>>(filepath: P) -> Vec<Line<'static>> {
     let file = File::open(filepath).unwrap();
@@ -15,10 +14,9 @@ pub fn parse_ssh_hosts<P: AsRef<Path>>(filepath: P) -> Vec<Line<'static>> {
         let line = line.unwrap();
         let trimmed = line.trim();
 
-
         //Check if line starts with "Host " (case-insensitive)
         let host = trimmed
-            .splitn(2,"Host ")
+            .splitn(2, "Host ")
             .nth(1)
             .unwrap_or("")
             .trim()
@@ -29,7 +27,7 @@ pub fn parse_ssh_hosts<P: AsRef<Path>>(filepath: P) -> Vec<Line<'static>> {
             hosts.push(host_line);
         }
     }
-hosts
+    hosts
 }
 
 #[cfg(test)]
@@ -38,7 +36,8 @@ mod tests {
 
     #[test]
     fn test_parse_ssh_hosts() {
-        let hosts = parse_ssh_hosts("demo.txt");
+        let hosts = parse_ssh_hosts("samples/spd");
         assert!(!hosts.is_empty());
     }
+
 }
