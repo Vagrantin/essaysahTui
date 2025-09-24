@@ -35,8 +35,7 @@ pub struct App {
 
 impl App {
     pub fn new() -> App {
-        //let filename = ".ssh/config";
-        let filename = "samples/spd";
+        let filename = "c:/users/xpvm5843/.ssh/config";
         let servers = parser::parse_ssh_hosts(filename);
         let number_of_items = servers.len();
         let filtered_items: Vec<(usize, Line<'static>)> = servers
@@ -139,7 +138,7 @@ impl App {
                 .to_string(),
             None => "".to_string(),
         };
-        let ssh_command = format!("ssh user@{}", &selected_server);
+        let ssh_command = format!("ssh {}", &selected_server);
 
         match Command::new("wt")
             .arg("-w")
