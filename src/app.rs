@@ -35,8 +35,7 @@ pub struct App {
 
 impl App {
     pub fn new() -> App {
-        //let filename = ".ssh/config";
-        let filename = "samples/spd";
+        let filename = ".ssh/config";
         let servers = parser::parse_ssh_hosts(filename);
         let number_of_items = servers.len();
         let filtered_items: Vec<(usize, Line<'static>)> = servers
