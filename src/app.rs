@@ -185,7 +185,6 @@ impl App {
                 .map(|(i, item)| (i, item.clone()))
                 .collect();
         } else {
-            // Simple string matching for files
             self.filtered_files = self
                 .files
                 .iter()
@@ -219,7 +218,6 @@ impl App {
         self.vertical_scroll_state = self.vertical_scroll_state.content_length(content_length);
     }
 
-    // CHANGED: Return owned data instead of borrowed data
     pub fn get_current_items_display(&self) -> (Vec<ListItem<'static>>, String) {
         match self.mode {
             AppMode::FileSelection => {
@@ -304,7 +302,8 @@ impl App {
             .trim()
             .to_string();
 
-        let ssh_command = format!("ssh {}", &selected_server);
+        let current_file = self.current_file.as_ref().unwrap();
+        let ssh_command = format!("ssh -F \"{}\" {}", current_file.path.to_string_lossy(),  &selected_server);
 
         match Command::new("wt")
             .arg("-w")
