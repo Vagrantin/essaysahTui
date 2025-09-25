@@ -8,12 +8,11 @@ use std::io::{self, Result};
 
 mod app;
 
+// In main.rs
+
 fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
     let mut app = app::App::new();
 
-    // For MS Windows weird behaviour we want to ignore
-    // the first couple of events, otherwise it triggers
-    // the connection to the first element in the list
     let mut startup_phase = true;
     let mut initial_event_ignored = 0;
     let required_events_to_ignore = 1;
@@ -24,11 +23,12 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
             app::AppMode::FileSelection => app.filtered_files.len(),
             app::AppMode::HostSelection | app::AppMode::Search => app.filtered_hosts.len(),
         };
-        app.vertical_scroll_state = app.vertical_scroll_state.content_length(content_length);
 
-        // Get display data before the draw closure to avoid borrow conflicts
-        let (items, list_title) = app.get_current_items_display();
+        app.vertical_scroll_state = app
+            .vertical_scroll_state
+            .content_length(content_length);
 
+        // All rendering logic should be inside the closure
         terminal.draw(|frame| {
             let chunks = Layout::vertical([
                 Constraint::Min(1),    // Main list (files or hosts)
@@ -37,24 +37,28 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
             ]);
             let [list_area, search_area, debug_area] = chunks.areas(frame.area());
 
-            let list = List::new(items)
-                .block(Block::default().title(list_title).borders(Borders::ALL));
-            
-            // Extract other data needed for rendering
+            // 1. First, get all the immutable data from 'app'.
+            let (items, list_title) = app.get_current_items_display();
             let current_mode = app.mode.clone();
             let search_query = app.search_query.clone();
             let status_message = app.status_message.clone();
 
-            frame.render_stateful_widget(list, list_area, &app.state);
+            let list = List::new(items)
+                .block(Block::default().title(list_title).borders(Borders::ALL));
+
+            // 2. Now, perform all the mutable operations on 'app'
+            //    in a separate, subsequent action.
+            frame.render_stateful_widget(list, list_area, &mut app.state);
+
             frame.render_stateful_widget(
                 Scrollbar::new(ScrollbarOrientation::VerticalRight)
                     .begin_symbol(Some("↑"))
                     .end_symbol(Some("↓")),
                 list_area,
-                &app.vertical_scroll_state,
+                &mut app.vertical_scroll_state,
             );
 
-            // Search/Input area
+            // Search/Input area (use the cloned variables)
             let (search_style, search_text) = match current_mode {
                 app::AppMode::FileSelection => {
                     if !search_query.is_empty() {
@@ -88,7 +92,7 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
                 .block(Block::bordered().title("Actions"));
             frame.render_widget(search_widget, search_area);
 
-            // Status area
+            // Status area (use the cloned variables)
             let status = match current_mode {
                 app::AppMode::FileSelection => {
                     format!("File Selection - q: quit, type to filter\n{}", &status_message)
@@ -181,7 +185,6 @@ fn run_render(mut terminal: DefaultTerminal) -> Result<()> {
         }
     }
 }
-
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
     terminal.clear()?;

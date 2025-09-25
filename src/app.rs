@@ -33,6 +33,7 @@ pub struct App {
     pub state: ListState,
     pub mode: AppMode,
     pub search_query: String,
+    #[allow(dead_code)]
     pub config_folder: String,
 }
 
@@ -218,10 +219,11 @@ impl App {
         self.vertical_scroll_state = self.vertical_scroll_state.content_length(content_length);
     }
 
-    pub fn get_current_items_display(&self) -> (Vec<ListItem>, String) {
+    // CHANGED: Return owned data instead of borrowed data
+    pub fn get_current_items_display(&self) -> (Vec<ListItem<'static>>, String) {
         match self.mode {
             AppMode::FileSelection => {
-                let items: Vec<ListItem> = self
+                let items: Vec<ListItem<'static>> = self
                     .filtered_files
                     .iter()
                     .enumerate()
@@ -245,16 +247,25 @@ impl App {
                 (items, title)
             }
             AppMode::HostSelection | AppMode::Search => {
-                let items: Vec<ListItem> = self
+                let items: Vec<ListItem<'static>> = self
                     .filtered_hosts
                     .iter()
                     .enumerate()
                     .map(|(i, (_, item))| {
+                        // Clone the Line content to create owned data
+                        let owned_line = Line::from(
+                            item.spans
+                                .iter()
+                                .map(|span| span.content.clone().into_owned())
+                                .collect::<Vec<String>>()
+                                .join("")
+                        );
+                        
                         if i == self.selected {
-                            ListItem::new(item.clone())
+                            ListItem::new(owned_line)
                                 .style(Style::default().fg(Color::Yellow))
                         } else {
-                            ListItem::new(item.clone())
+                            ListItem::new(owned_line)
                         }
                     })
                     .collect();
