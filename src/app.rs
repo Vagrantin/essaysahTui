@@ -39,7 +39,7 @@ pub struct App {
 
 impl App {
     pub fn new() -> App {
-        let config_folder = "c:/users/xpvm5843/.ssh/".to_string(); // Default folder
+        let config_folder = "c:/users/xpvm5843/.ssh/config.d".to_string(); // Default folder
         let files = parser::get_files_in_folder(&config_folder);
         let number_of_files = files.len();
         
