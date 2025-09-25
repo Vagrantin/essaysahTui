@@ -2,3 +2,4 @@
 spd
 .ssh/
 /samples
+*.swp
